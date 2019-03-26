@@ -1,6 +1,7 @@
 # Route Mining
 Software Architecture and Design Patterns | University of Michigan-Dearborn | Dearborn, MI | 2019 </br>
-{All verbiage in this document (unless otherwise stated) was provided as project specifications in CIS 476 by Professor Xu at University of Michigan- Dearborn }
+</BR>
+<b>DISCLAIMER:</b> All verbiage in this document (unless otherwise stated) was provided as project specifications in CIS 476 by Professor Xu at University of Michigan- Dearborn.
 
 # Objective
   In this project, you are required to design a data driven direct mail planning software “RouteMining” that will help marketing team to     analyze specific carrier routes when mapped to house address. 
