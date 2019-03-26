@@ -5,8 +5,7 @@ Software Architecture and Design Patterns | University of Michigan-Dearborn | De
 
 # Objective
   In this project, you are required to design a data driven direct mail planning software “RouteMining” that will help marketing team to     analyze specific carrier routes when mapped to house address. 
-  The RouteMining can be standalone or web-based software with the following functions/features.
-  
+  The RouteMining can be standalone or web-based software with the following functions/features:</br> 
   1) Input is a list of addresses in Excel format containing street number, street name, optional apartment number, city, state, zip.</br>
   
   2) RouteMining should be able to connect to google, usps or any web or API of your choice to validate and correct the addres
