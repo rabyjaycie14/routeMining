@@ -14,8 +14,8 @@ namespace routeMining
         // for SmartyStreets API
         public class smartyStreet_Credentials
         {
-            public string authId = "d104ca15-4c71-fd06-ef5a-d83ea48062c1";
-            public string authToken = "Y3osq0zukbsCWzLq3KMu";
+            public string authId = "ENTER YOUR OWN AUTHORIZATION ID";
+            public string authToken = "ENTER YOUR OWN AUTHORIZATION TOKEN";
         }
 
         //Class to hold Singleton of the smartyStreet_Credentials() class
