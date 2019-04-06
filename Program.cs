@@ -1,118 +1,58 @@
-﻿using System;
+﻿/* CIS 476 | Term Project | Winter 2019 */
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.IO;
+using SmartyStreets;
+using SmartyStreets.USStreetApi;
 
 namespace routeMining
 {
     internal class Program
     {
-        public class userCredentials_UPS
+        // Class to hold authorization ID and authorization token
+        // for SmartyStreets API
+        public class smartyStreet_Credentials
         {
-            public string accessLicenseNumber = "abcd1234";
-            public string userID = "username";
-            public string password = "password";
-            public string domain = "https://wwwcie.ups.com/ups.app/xml/XAV";
+            public string authId = "d104ca15-4c71-fd06-ef5a-d83ea48062c1";
+            public string authToken = "Y3osq0zukbsCWzLq3KMu";
         }
 
-        public class userCredentials_SS
+        //Class to hold Singleton of the smartyStreet_Credentials() class
+        public class Singleton
         {
-            public string scheme = "https";
-            public string hostname = "us-street.api.smartystreets.com";
-            public string path = "/street-address";
-            public string query = "String? auth-id=123&auth-token=abc";
-        }
-
-        // Singleton class used to create a single instance of the credentials needed to utilize
-        // the UPS API
-        public class singleton_UPS
-        {
-            private static singleton_UPS instance;
-            public static List<userCredentials_UPS> userCredentials_UPSList { get; set; }
-            public singleton_UPS() { }
-            public static singleton_UPS Instance
+            private static Singleton instance;
+            public static List<smartyStreet_Credentials> smartyStreet_CredentialsList { get; set; }
+            public Singleton() { }
+            public static Singleton Instance
             {
                 get
                 {
                     if (instance == null)
                     {
-                        instance = new singleton_UPS();
-                        Console.WriteLine("UPS instance is null");
-
+                        instance = new Singleton();
                     }
-                    if (userCredentials_UPSList == null)
+                    if (smartyStreet_CredentialsList == null)
                     {
-                        userCredentials_UPSList = new List<userCredentials_UPS>();
-                        Console.WriteLine("UPS instance list is null");
-
+                        smartyStreet_CredentialsList = new List<smartyStreet_Credentials>();
                     }
-                    Console.WriteLine("SS instance and list are NOT null");
                     return instance;
                 }
             }
-            public List<userCredentials_UPS> AddCredential(userCredentials_UPS userCredentials_UPS)
-            {
-                userCredentials_UPSList.Add(userCredentials_UPS);
-                return userCredentials_UPSList;
-            }
 
-            public List<userCredentials_UPS> veryifyCredentials_UPS(userCredentials_UPS userData)
+            //Method to obtain Singleton list of data from smartyStreet_Credentials()
+            public List<smartyStreet_Credentials> getCredentialList(smartyStreet_Credentials userData)
             {
-                string accessLicenseNumber = userData.accessLicenseNumber;
-                string userID = userData.userID;
-                string password = userData.password;
-                string domain = userData.domain;
-
-                singleton_UPS singleton = singleton_UPS.Instance;
+                Singleton singleton = Singleton.Instance;
                 var list = singleton.AddCredential(userData);
-
                 return list;
             }
-        }
 
-        // Singleton class used to create a single instance of the credentials needed to utilize
-        // the SmartyStreets API
-        public class singleton_SS
-        {
-            private static singleton_SS instance;
-            public static List<userCredentials_SS> userCredentials_SSList { get; set; }
-            public singleton_SS() { }
-            public static singleton_SS Instance
+            // Method to add data from smartyStreet_Credentials() to List<smartyStreet_Credentials> 
+            public List<smartyStreet_Credentials> AddCredential(smartyStreet_Credentials smartyStreet_Credentials)
             {
-                get
-                {
-                    if (instance == null)
-                    {
-                        instance = new singleton_SS();
-                        Console.WriteLine("SS instance is null");
-                    }
-                    if (userCredentials_SSList == null)
-                    {
-                        userCredentials_SSList = new List<userCredentials_SS>();
-                        Console.WriteLine("SS instance list is null");
-                    }
-                    Console.WriteLine("SS instance and list are NOT null");
-                    return instance;
-                }
-            }
-            public List<userCredentials_SS> AddCredential(userCredentials_SS userCredentials_SS)
-            {
-                userCredentials_SSList.Add(userCredentials_SS);
-                return userCredentials_SSList;
-            }
-
-            public List<userCredentials_SS> veryifyCredentials_SS(userCredentials_SS userData)
-            {
-                string scheme = userData.scheme;
-                string hostname = userData.hostname;
-                string path = userData.path;
-                string query = userData.query;
-
-                singleton_SS singleton = singleton_SS.Instance;
-                var list = singleton.AddCredential(userData);
-
-                return list;
+                smartyStreet_CredentialsList.Add(smartyStreet_Credentials);
+                return smartyStreet_CredentialsList;
             }
         }
 
@@ -123,11 +63,11 @@ namespace routeMining
             IHandlerInterface_API SetNextObject(IHandlerInterface_API handler);
 
             //  Method for executing a request (conversion type)
-            object Handle(object request);
+            string Handle(string request);
         }
 
         // Handler Abstract Class
-        private abstract class API_abstractHandler : IHandlerInterface_API
+        public abstract class API_abstractHandler : IHandlerInterface_API
         {
             protected IHandlerInterface_API nextObject;
 
@@ -137,7 +77,7 @@ namespace routeMining
                 return handler;
             }
 
-            public virtual object Handle(object request)
+            public virtual string Handle(string request)
             {
                 if (nextObject != null)
                 {
@@ -150,16 +90,71 @@ namespace routeMining
             }
         }
 
-        // Concrete class to handle API call to ups
-        class API_ups : API_abstractHandler
+        // Concrete class to handle API call for Address Validation 
+        // to the SmartyStreets API
+        class AddressValidation : API_abstractHandler
         {
-
-            public override object Handle(object request)
+            public override string Handle(string request)
             {
-                if ((request as string) == "ups")
+                if ((request as string) == "addressValidation")
                 {
-                    Console.WriteLine("ups");
-                    return request;
+                    Singleton Singleton = new Singleton();
+                    smartyStreet_Credentials credentials = new smartyStreet_Credentials(); 
+                    var userInfo = Singleton.getCredentialList(credentials);
+
+                    var authId = userInfo[0].authId;
+                    var authToken = userInfo[0].authToken;
+
+                    var client = new ClientBuilder(authId, authToken).BuildUsStreetApiClient();
+
+                    var lookup = new Lookup
+                    {
+                        Street = "4901 Evergreen Rd",
+                        City = "Dearborn",
+                        State = "MI",
+                        ZipCode = "48128",
+                        MaxCandidates = 1,
+                        MatchStrategy = Lookup.INVALID // "invalid" is the most permissive match
+                    };
+
+                    var lookup2 = new Lookup
+                    {
+                        Street = "5101 Evergreen Rd",
+                        City = "Dearborn",
+                        State = "MI",
+                        ZipCode = "48128",
+                        MaxCandidates = 1,
+                        MatchStrategy = Lookup.INVALID // "invalid" is the most permissive match
+                    };
+
+                    try
+                    {
+                        client.Send(lookup);
+                        client.Send(lookup2);
+                    }
+                    catch (SmartyException ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        Console.WriteLine(ex.StackTrace);
+                    }
+                    catch (IOException ex)
+                    {
+                        Console.WriteLine(ex.StackTrace);
+                    }
+
+                    var candidates = lookup.Result;
+                    var candidates2 = lookup2.Result;
+
+                    if (candidates.Count == 0 || candidates2.Count == 0)
+                    {
+                        return "No candidates. This means the address is not valid.";
+                    }
+
+                    var firstCandidate = candidates[0];
+                    var secondCandidate = candidates2[0];
+
+                    Console.WriteLine("Address is valid.");
+                    return ("Address at " + lookup.Street + " " + lookup.City + " " + lookup.State + " " + lookup.ZipCode + " is verified and Address at " + lookup2.Street + " " + lookup2.City + " " + lookup2.State + " " + lookup2.ZipCode + " is verified.");
                 }
                 else
                 {
@@ -168,15 +163,73 @@ namespace routeMining
             }
         }
 
-        // Concrete clsas to handle API call to smartyStreets
-        class API_smartyStreets : API_abstractHandler
+        // Concrete class to handle API call for Carrier Routes 
+        // to the SmartyStreets API
+        class CarrierRoute : API_abstractHandler
         {
-            public override object Handle(object request)
+            public override string Handle(string request)
             {
-                if ((request as string) == "ss")
+                if ((request as string) == "carrierRoute")
                 {
-                    Console.WriteLine("SMARTY STREETS");
-                    return request;
+                    Singleton Singleton = new Singleton();
+                    smartyStreet_Credentials credentials = new smartyStreet_Credentials();
+                    var userInfo = Singleton.getCredentialList(credentials);
+
+                    var authId = userInfo[0].authId;
+                    var authToken = userInfo[0].authToken;
+
+                    var client = new ClientBuilder(authId, authToken).BuildUsStreetApiClient();
+
+                    var lookup = new Lookup
+                    {
+                        Street = "4901 Evergreen Rd",
+                        City = "Dearborn",
+                        State = "MI",
+                        ZipCode = "48128",
+                        MaxCandidates = 1,
+                        MatchStrategy = Lookup.INVALID // "invalid" is the most permissive match
+                    };
+
+                    var lookup2 = new Lookup
+                    {
+                        Street = "5101 Evergreen Rd",
+                        City = "Dearborn",
+                        State = "MI",
+                        ZipCode = "48128",
+                        MaxCandidates = 1,
+                        MatchStrategy = Lookup.INVALID // "invalid" is the most permissive match
+                    };
+
+                    try
+                    {
+                        client.Send(lookup);
+                        client.Send(lookup2);
+                    }
+                    catch (SmartyException ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        Console.WriteLine(ex.StackTrace);
+                    }
+                    catch (IOException ex)
+                    {
+                        Console.WriteLine(ex.StackTrace);
+                    }
+
+                    var candidates = lookup.Result;
+                    var candidates2 = lookup2.Result;
+
+                    if (candidates.Count == 0 || candidates2.Count == 0)
+                    {
+                        return "No candidates. This means the address is not valid.";
+                    }
+
+                    var firstCandidate = candidates[0];
+                    var secondCandidate = candidates2[0];
+
+                    Console.WriteLine("Address is valid.");
+                    var output1 = "Carrier Route for address at " + lookup.Street + " " + lookup.City + " " + lookup.State + " " + lookup.ZipCode + " is " + firstCandidate.Metadata.CarrierRoute + ".\n";
+                    var output2 = "Carrier Route for address at " + lookup2.Street + " " + lookup2.City + " " + lookup2.State + " " + lookup2.ZipCode + " is " + secondCandidate.Metadata.CarrierRoute + ".";
+                    return (output1 + output2);
                 }
                 else
                 {
@@ -185,62 +238,83 @@ namespace routeMining
             }
         }
 
-        // Details of Client Request
+        // Decorator Abstract Class
+        // Extends API_abstractHandler class to be interchangeable with
+        // its concrete decorators
+        public abstract class Decorator : API_abstractHandler
+        {
+            public abstract override string Handle(string request);
+        }
+
+        public class add_API_Name : Decorator
+        {
+            private API_abstractHandler handler;
+
+            public add_API_Name() { }
+
+
+            public add_API_Name(API_abstractHandler handler)
+            {
+                this.handler = handler;
+            }
+
+            public override string Handle(string request)
+            {
+                string getResult = handler.Handle(request);
+                return getResult;
+            }
+        }
+
+        // Client invokes chain of responsibility pattern by calling API_abstractHandler
         private class ClientRequest
         {
-            // Overloaded Constructor
-            public static void ClientInput(API_abstractHandler handler, string conversionType)
+            public static string ClientInput(API_abstractHandler handler, string conversionType)
             {
                 object result = handler.Handle(conversionType);
 
                 if (result != null)
                 {
                     Console.Write($"Result: {result}\n");
+                    return ($"{result}");
                 }
                 else
                 {
                     Console.WriteLine($"{conversionType} was not utilized.\n");
+                    return ($"{conversionType} was not utilized.\n");
                 } 
             }
         }
 
-        private static void Main(string[] args)
+        public static void Main(string[] args)
         {
-            
-            API_ups ups = new API_ups();
-            API_smartyStreets ss = new API_smartyStreets();
-            userCredentials_UPS creds_UPS = new userCredentials_UPS();
-            userCredentials_SS creds_SS = new userCredentials_SS();
-            singleton_UPS singleton1 = new singleton_UPS();
-            singleton_SS singleton2 = new singleton_SS();
+            // Create object for smartyStreets_Credentials() and Singleton()
+            // Create var to hold singleton instance of smartyStreet_Credentials()
+            smartyStreet_Credentials credentials = new smartyStreet_Credentials();
+            Singleton Singleton = new Singleton();
+            var userInfo = Singleton.getCredentialList(credentials); 
 
-            ups.SetNextObject(ss); 
+            // Create object for AddressValidation() and CarrierRoute()
+            // Create chain link of objects to establish Chain of Responsibility 
+            API_abstractHandler addValid = new AddressValidation();
+            API_abstractHandler carrRoute = new CarrierRoute();
+            addValid.SetNextObject(carrRoute); 
 
-            var test1 = singleton1.veryifyCredentials_UPS(creds_UPS);
-            var test2 = singleton2.veryifyCredentials_SS(creds_SS);
-
-            Console.WriteLine("UPS concrete handler:");
-            ClientRequest.ClientInput(ups, "ups");
+            Console.WriteLine("Address Validation");  //test address validation
+            ClientRequest.ClientInput(addValid, "addressValidation");
             Console.WriteLine();
 
-            Console.WriteLine("SS concrete handler:");
-            ClientRequest.ClientInput(ups, "ups");
+            Console.WriteLine("Carrier Route"); //test carrier route
+            ClientRequest.ClientInput(addValid, "carrierRoute");
             Console.WriteLine();
 
-            Console.WriteLine("UPS Singleton Instance: ");
-            Console.WriteLine("Access license number: " + test1[0].accessLicenseNumber);
-            Console.WriteLine("User ID: " + test1[0].userID);
-            Console.WriteLine("Password: " + test1[0].password);
-            Console.WriteLine("Domain: " + test1[0].domain);
+            Console.WriteLine("Test Decorator for Address Validation");
+            addValid = new add_API_Name(addValid); // add decorator for address validation
+            ClientRequest.ClientInput(addValid, "addressValidation"); //make request with decorator
             Console.WriteLine();
 
-            Console.WriteLine("SS Singleton Instance: ");
-            Console.WriteLine("Access license number: " + test2[0].scheme);
-            Console.WriteLine("User ID: " + test2[0].hostname);
-            Console.WriteLine("Password: " + test2[0].path);
-            Console.WriteLine("Domain: " + test2[0].query);
-
-
+            Console.WriteLine("Test Decorator for Carrier Route");
+            addValid = new add_API_Name(addValid); 
+            ClientRequest.ClientInput(addValid, "addressValidation");
             Console.WriteLine();
         }
 
