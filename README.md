@@ -1,24 +1,25 @@
 # Route Mining
 Software Architecture and Design Patterns | University of Michigan-Dearborn | Dearborn, MI | 2019 </br>
 </BR>
-<b>DISCLAIMER:</b> All verbiage in this document (unless otherwise stated) was provided as project specifications in CIS 476 by Professor Xu at University of Michigan- Dearborn.
 
 # Objective
-  In this project, you are required to design a data driven direct mail planning software “RouteMining” that will help marketing team to     analyze specific carrier routes when mapped to house address. 
-  The RouteMining can be standalone or web-based software with the following functions/features:</br> 
-  1) Input is a list of addresses in Excel format containing street number, street name, optional apartment number, city, state, zip.</br>
+  RouteMining is a standalone data driven direct mail planning software that will help marketing teams to analyze specific carrier routes     when mapped to a house address, with the following functions/features:</br> 
   
-  2) RouteMining should be able to connect to google, usps or any web or API of your choice to validate and correct the addres
-      automatically. <br/>
-      
-  3) RouteMining should be able to use https://eddm.usps.com/eddm/customer/routeSearch.action or any web API of
-     your choice to find an address’s carrier route. </br>
+  1) Input is a street number, street name, city, state and zip.</br>
+  
+  2) RouteMining connects to SmartyStreets API to validate an address and return that addresses route carrier number. <br/>
+
+  4) RouteMining provides a GUI to display two reports and allow a user to export the report as a .txt file.</br>
+     a) Report one: input address validation, for example:
      
-  4) RouteMining should provide a GUI to display two reports and allow a user to export the report in Excel format.</br>
-     a) Report one: a list of addresses plus carrier route
-     b) Report two: a list of route plus number of addresses in each route.
+          New file created: 4/5/2019 8:59:09 PM
+          Address Validation provided by SmartyStreets API
+          https://smartystreets.com/products/single-address
+          Address: XXXX Jones Street New York City, New York 12345
+          
+     b) Report two: carrier route for the address, for example:
      
- # Additional Considerations
-  1) Provide a detailed class diagram, mapping pattern classes to actual application classes
-  2) A minimum of three design patterns must be used to solve the problem
-  3) Developed code must be throroughly commented and synchronized with the model
+          New file created: 4/5/2019 8:59:10 PM
+          Carrier Route provided by SmartyStreets API
+          https://smartystreets.com/products/single-address
+          Carrier Route for XXXX Jones Street New York City, New York 12345 is C001 (provided by SmartyStreets API)
